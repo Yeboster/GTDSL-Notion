@@ -10,9 +10,6 @@ class NotionAPI:
         self.client = NotionClient(
             token_v2=token, monitor=True, start_monitoring=True, enable_caching=False)
 
-    def get_client(self):
-        return self.client
-
     def current_space(self):
         return self.client.current_space
 
@@ -35,20 +32,51 @@ class NotionAPI:
 
         return workbench
 
-    def get_projects(self):
+    def get_projects_collection_view(self):
         key = 'projects'
         workbench = self.get_workbench()
 
         source = workbench.children
-        projects = self._get_resource(key, source)
+        cv = self._get_resource(key, source)
+        projects = cv
 
         return projects
 
-    def get_tasks(self):
+    def get_projects_views(self):
+        return self.get_projects_collection_view().views
+
+
+    def get_projects_rows(self):
+        cv = self.get_projects_collection_view()
+
+        return cv.collection.get_rows()
+
+    def get_tasks_collection_view(self):
         key = 'tasks'
         workbench = self.get_workbench()
 
         source = workbench.children
-        tasks = self._get_resource(key, source)
+        cv = self._get_resource(key, source)
+        tasks = cv
 
         return tasks
+
+    def get_tasks_views(self):
+        return self.get_tasks_collection_view().views
+
+    def get_tasks_rows(self):
+        cv = self.get_tasks_collection_view()
+
+        return cv.collection.get_rows()
+
+    def filter_tasks_with_schedule(self):
+        filter_params = [
+            {
+                "property": "schedule",
+                "comparator": "is_not_empty"
+            }
+        ]
+
+        result = self.get_tasks_views()[0].build_query(
+            filter=filter_params).execute()
+        return result

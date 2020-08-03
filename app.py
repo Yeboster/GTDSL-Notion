@@ -10,9 +10,16 @@ if __name__ == '__main__':
 
     token = getenv("NOTION_TOKEN")
     client = NotionAPI(token)
-    tasks = client.get_tasks()
-    print(tasks)
-    print(tasks.children)
+    cv_tasks = client.get_tasks_collection_view()
+    print(cv_tasks)
+
+    tasks_views = cv_tasks.views
+    print(tasks_views)
+
+    scheduled_tasks = client.filter_tasks_with_schedule()
+    print(scheduled_tasks)
+    for task in scheduled_tasks:
+        print(task.values)
     # TODO:
     # x- Take all pages
     # x- Find the tasks one

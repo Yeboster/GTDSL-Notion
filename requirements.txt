@@ -1,2 +1,2 @@
-notion
+notion-py
 python-dotenv
