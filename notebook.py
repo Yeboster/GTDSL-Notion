@@ -18,10 +18,9 @@ token = getenv("NOTION_TOKEN")
 client = NotionClient(
     token_v2=token, monitor=True, start_monitoring=True, enable_caching=False)
 
-# TODO: Save in env
-inbox_url = 'https://www.notion.so/0fff8abb5b594cb19c0efe7ad2dc5885?v=5c9f252145a94c629c3c778e2f642e23'
-tasks_url = 'https://www.notion.so/d16609502fc44cbcb22747c853f549da?v=88db299546b6457fad44eb4ee5ee094b'
-projects_url = 'https://www.notion.so/e4f02558ec1442c4a3bb2946e7394d69?v=dc7e8febc0504c818903af092d5c580c'
+inbox_url = getenv("INBOX_URL")
+tasks_url = getenv("TASKS_URL")
+projects_url = getenv("PROJECTS_URL")
 
 # %%
 inbox_cv = client.get_collection_view(inbox_url)
