@@ -1,36 +1,42 @@
 from typing import *
 from dataclasses import dataclass
-from datetime import datetime
+from notion.collection import NotionDate
+
+
+TO_INSERT_KEYS: List[str] = ['title',
+                             'project', 'scheduled', 'status', 'context']
+
 
 @dataclass
 class Task:
     """Class to represent notion GTD tasks"""
-    name: str = None
+    id: str = None
+    title: str = None
     project: str = None
-    scheduled: datetime = None
-    type: str = None
+    scheduled: NotionDate = None
+    status: str = None
     context: str = None
+    convert: bool = False
+
 
 def extract_properties(properties: Dict[str, str], task: Task) -> Task:
-    keys = ['scheduled', 'type', 'context']
+    keys = ['scheduled', 'status', 'context', 'convert']
     for key in keys:
         value = properties[key]
-        if key == 'scheduled' and value is not None:
-            # TODO: Add also end
-            setattr(task, key, value.start)
-        else:
-            setattr(task, key, value)
+        setattr(task, key, value)
 
     return task
 
-def decode_dsl(content: str, properties: Dict[str, str]) -> Task:
+
+def decode_dsl(id: str, content: str, properties: Dict[str, str]) -> Task:
     task: Task = Task()
+    task.id = id
     if (pos := content.find(':')) > -1:
-        task.name = content[pos+1:].strip()
-        task.project = content[:pos].strip()
+        task.title = content[pos+1:].strip().capitalize()
+        task.project = content[:pos].strip().capitalize()
     else:
-        task.name = content.strip()
+        task.title = content.strip().capitalize()
 
     task = extract_properties(properties, task)
-    
+
     return task
