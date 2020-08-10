@@ -1,0 +1,8 @@
+
+Todo:
+  ☐ Convert notebook to modules @started(20-08-10 16:13)
+  ☐ Add polling to check inbox tasks
+  ☐ Logging
+  ☐ Dockerize application
+  ☐ Kubernetize application
+  ☐ Deploy application
