@@ -1,8 +1,9 @@
 
 Todo:
-  ☐ Convert notebook to modules @started(20-08-10 16:13)
+  ✔ Convert notebook to modules @started(20-08-10 16:13) @done(20-08-11 13:59) @lasted(21h46m56s)
   ☐ Add polling to check inbox tasks
-  ☐ Logging
+  ☐ Manage 503 error: restart procedure and check if tasks already exists + print error into inbox task.
+  ✔ Logging @done(20-08-11 14:00)
   ☐ Dockerize application
   ☐ Kubernetize application
   ☐ Deploy application

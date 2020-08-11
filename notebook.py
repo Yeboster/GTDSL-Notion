@@ -2,7 +2,7 @@
 from typing import *
 
 from notion.block import PageBlock, TextBlock
-from notion_dsl import TO_INSERT_KEYS, decode_dsl, Task
+from notion_dsl import decode_dsl, Task
 from dotenv import load_dotenv
 from notion.block import PageBlock, TextBlock
 from notion.client import NotionClient
@@ -26,7 +26,6 @@ projects_url = getenv("PROJECTS_URL")
 inbox_cv = client.get_collection_view(inbox_url)
 inbox_col = inbox_cv.collection
 
-# %%
 inbox_tasks = inbox_col.get_rows()
 tasks = []
 for n_task in inbox_tasks:
@@ -36,57 +35,6 @@ for n_task in inbox_tasks:
 
     print(task)
     tasks.append(task)
-
-# %%
-# Find id of Project or create new one
-task: Task = tasks[0]  # Pass as param
-# TODO: Project is optional
-project_task = task.project.lower()
-
-projects_cv = client.get_collection_view(projects_url)
-projects_col: Collection = projects_cv.collection
-projects_schema = projects_col.get_schema_properties()
-
-found_project: CollectionRowBlock = None
-for project in projects_col.get_rows():
-    title: str = project.title
-    if title and title.lower().find(project_task) > -1:
-        print(project)
-        found_project = project
-        break
-
-project_to_link: CollectionRowBlock = found_project
-if found_project is None:
-    project_to_link: CollectionRowBlock = projects_col.add_row()
-    # Hard coding values, for now
-    project_to_link.title = project_task.capitalize()
-    project_to_link.stage = '💡Idea'
-    # TODO: Add other properties like: tags, location, ...
-
-# %%
-# Create task and link it to project, if any
-tasks_cv = client.get_collection_view(tasks_url)
-tasks_col: Collection = tasks_cv.collection
-tasks_schema = tasks_col.get_schema_properties()
-if task.convert:
-   # update_views=False improves performance
-    created_task: CollectionRowBlock = tasks_col.add_row(update_views=False)
-    for key in TO_INSERT_KEYS:
-        if key == "project" and project_to_link:
-            value = project_to_link.id
-        else:
-            value = getattr(task, key)
-
-        print(key, value)
-
-        setattr(created_task, key, value)
-    # Post creation
-    inbox_task: CollectionRowBlock = client.get_block(task.id)
-    inbox_task.convert = False
-    task_title = inbox_task.title
-    inbox_task.title = "✅ " + task_title
-    content = f"Added task to **'{task.project}'** project" if task.project else f"Task added without project"
-    inbox_task.children.add_new(TextBlock, title=content)
 
 # %%
 # TODO: Add scheduled tasks to calendar
