@@ -15,15 +15,15 @@ ENV ENVIRONMENT "production"
 
 WORKDIR /app
 
-# Add custom user, coz pip is not happy without
-RUN useradd appuser && chown -R appuser /app && mkdir /home/appuser && chown -R appuser /home/appuser 
-USER appuser
-
 # Install pip requirements
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
 COPY . /app
+
+RUN useradd appuser && chown -R appuser /app 
+RUN mkdir /home/appuser && chown -R appuser /home/appuser
+USER appuser
 
 
 CMD ["python", "app.py"]
