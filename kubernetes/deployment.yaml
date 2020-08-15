@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notion-gtdls
+spec:
+  selector:
+    matchLabels:
+      app: notion-gtdls
+  template:
+    metadata:
+      labels:
+        app: notion-gtdls
+    spec:
+      containers:
+        - name: notion-gtdls
+          image: notion-gtdls
+          envFrom:
+            - secretRef:
+                name: notion-gtdls-env
+          resources:
+            limits:
+              memory: "64Mi"
+              cpu: "100m"

@@ -1,0 +1,11 @@
+apiVersion: skaffold/v2beta7
+kind: Config
+metadata:
+  name: notion-gtdls
+build:
+  artifacts:
+    - image: notiongtdls
+deploy:
+  kustomize:
+    paths:
+      - kubernetes

@@ -1,0 +1,8 @@
+namespace: notion-gtdls
+secretGenerator:
+  - name: notion-gdtls-env
+    envs:
+      - ../.env
+
+resources:
+  - deployment.yaml
