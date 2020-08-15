@@ -81,8 +81,7 @@ class Task:
 
                 setattr(created_task, key, value)
 
-            logging.debug(
-                f"Created task properties: {created_task.get_all_properties()}")
+            self._inserted = True
 
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
         """Run all the actions after creating GTD task."""
