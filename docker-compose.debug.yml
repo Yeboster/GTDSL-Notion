@@ -3,7 +3,7 @@ version: '3.4'
 services:
   notiongtdls:
     image: notiongtdls
-    name: notiongtdls
+    container_name: notiongtdls
     build:
       context: .
       dockerfile: Dockerfile
