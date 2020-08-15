@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  notiongtdls:
+    image: notiongtdls
+    name: notiongtdls
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    entrypoint: /bin/bash
+    command: -c "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 app.py"
+    ports:
+      - 5678:5678
+

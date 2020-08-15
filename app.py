@@ -46,12 +46,15 @@ if __name__ == '__main__':
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", level=log_level)
 
     token = getenv("NOTION_TOKEN")
-    client = NotionClient(
-        token_v2=token, monitor=True, start_monitoring=True, enable_caching=False)
-
     inbox_url = getenv("INBOX_URL")
     tasks_url = getenv("TASKS_URL")
     projects_url = getenv("PROJECTS_URL")
+
+    if not (token and inbox_url and tasks_url and projects_url):
+        raise Exception("Missing envs.")
+
+    client = NotionClient(
+        token_v2=token, monitor=True, start_monitoring=True, enable_caching=False)
 
     logging.info("Starting the application...")
 
