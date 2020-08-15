@@ -1,9 +1,9 @@
 
 Todo:
   ✔ Convert notebook to modules @started(20-08-10 16:13) @done(20-08-11 13:59) @lasted(21h46m56s)
-  ☐ Add polling to check inbox tasks
-  ☐ Observe Collection and trigger observe task @started(20-08-15 16:00)
-  ☐ Observe task
+  ✔ Add polling to check inbox tasks @started(20-08-15 16:19) @done(20-08-15 16:56) @lasted(37m39s)
+  ☐ Observe Collection and trigger observe task @deferred
+  ☐ Observe task @deferred
   ☐ Manage 503 error: restart procedure and check if tasks already exists + print error into inbox task.
   ✔ Logging @done(20-08-11 14:00)
   ☐ Dockerize application

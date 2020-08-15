@@ -1,2 +1,3 @@
 notion-py
 python-dotenv
+schedule

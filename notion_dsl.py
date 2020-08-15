@@ -48,7 +48,7 @@ class Task:
 
         return insert_dict
 
-    def assign_or_create_project_from(self, projects_col: Collection) -> None:
+    def assign_or_create_project_into(self, projects_col: Collection) -> None:
         """Get project based on name. If found it returns a Project GTD wrapper"""
         project: Project = None
         if self.project_name and projects_col and not self.assigned_project:
@@ -104,3 +104,18 @@ def decode_dsl(id: str, content: str, properties: Dict[str, str]) -> Task:
     task.apply_properties_from(properties)
 
     return task
+
+
+def get_tasks(collection: Collection) -> List[Task]:
+    """Get rows from collection parsed as Task."""
+    tasks: List[Task] = []
+    for notion_task in collection.get_rows():
+        properties: Dict[str, str] = notion_task.get_all_properties()
+
+        id = notion_task.id
+        title = notion_task.title
+        task: Task = decode_dsl(id, title, properties)
+
+        tasks.append(task)
+
+    return tasks
