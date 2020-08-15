@@ -28,6 +28,7 @@ class Task:
     status: str = None
     context: str = None
     convert: bool = False
+    _inserted: bool = False
 
     def apply_properties_from(self, properties: Dict[str, str]) -> None:
         keys = ['scheduled', 'status', 'context', 'url', 'convert']
@@ -50,7 +51,7 @@ class Task:
     def assign_or_create_project_from(self, projects_col: Collection) -> None:
         """Get project based on name. If found it returns a Project GTD wrapper"""
         project: Project = None
-        if self.project_name and projects_col:
+        if self.project_name and projects_col and not self.assigned_project:
             for proj in projects_col.get_rows():
                 title: str = proj.title
                 if title and title.lower().find(self.project_name) > -1:
@@ -58,15 +59,30 @@ class Task:
                     project = Project(proj.id, proj.title)
                     break
 
-        if project is None:
-            logging.debug('Create project since no one found.')
-            notion_project: Project = projects_col.add_row(update_views=False)
-            notion_project.title = self.project_name
-            notion_project.stage = '💡Idea'
+            if project is None:
+                logging.debug('Create project since no one found.')
+                notion_project: Project = projects_col.add_row(
+                    update_views=False)
+                notion_project.title = self.project_name
+                notion_project.stage = '💡Idea'
 
-            project = Project(notion_project.id, notion_project.title)
+                project = Project(notion_project.id, notion_project.title)
 
-        self.assigned_project = project
+            self.assigned_project = project
+
+    def insert_into(self, tasks_col: Collection, force=False) -> None:
+        """Insert task into collection if not existing"""
+        if tasks_col and (not self._inserted or force):
+            created_task: CollectionRowBlock = tasks_col.add_row(
+                update_views=False)
+
+            for key, value in self.dict_to_insert().items():
+                logging.debug(f"{key} -> {value}")
+
+                setattr(created_task, key, value)
+
+            logging.debug(
+                f"Created task properties: {created_task.get_all_properties()}")
 
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
         """Run all the actions after creating GTD task."""

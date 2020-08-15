@@ -1,4 +1,5 @@
 # %%
+from pprint import pprint
 from typing import *
 
 from notion.block import PageBlock, TextBlock
@@ -36,6 +37,17 @@ for n_task in inbox_tasks:
     print(task)
     tasks.append(task)
 
+# %%
+
+
+def callback(record, difference):
+    print(record, difference)
+
+
+inbox_col.add_callback(callback)
+
+while True:
+    pass
 # %%
 # TODO: Add scheduled tasks to calendar
 # TODO: Add laptop tasks to pomodone

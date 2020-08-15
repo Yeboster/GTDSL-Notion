@@ -61,15 +61,7 @@ if __name__ == '__main__':
 
             logging.info(f"Creating new task for {task}")
 
-            created_task: CollectionRowBlock = tasks_col.add_row(
-                update_views=False)
-            for key, value in task.dict_to_insert().items():
-                logging.debug(f"{key} -> {value}")
-
-                setattr(created_task, key, value)
-
-            logging.debug(
-                f"Created task properties: {created_task.get_all_properties()}")
+            task.insert_into(inbox_col)
 
             logging.debug("Running post creation actions")
 
