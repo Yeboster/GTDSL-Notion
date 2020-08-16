@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from notion.client import NotionClient
 from notion.collection import Collection
 
-from notion_dsl import Task, get_tasks
+from lib.dsl import Task, get_tasks
 
 logger = logging.getLogger(__name__)
 

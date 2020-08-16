@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
 from typing import *
-import typing
 
 from notion.block import TextBlock
 from notion.collection import NotionDate, Collection, CollectionRowBlock
