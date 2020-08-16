@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import *
+import typing
 
 from notion.block import TextBlock
 from notion.collection import NotionDate, Collection, CollectionRowBlock
@@ -52,16 +53,13 @@ class Task:
         """Get project based on name. If found it returns a Project GTD wrapper"""
         project: Project = None
         if self.project_name and projects_col and not self.assigned_project:
-            for proj in projects_col.get_rows():
-                title: str = proj.title
-                if title and title.lower().find(self.project_name) > -1:
-                    # TODO: Find multiple projects
-                    project = Project(proj.id, proj.title)
-                    break
+
+            if found_project := _find_resource(self.project_name, projects_col):
+                project = Project(found_project.id, found_project.title)
 
             if project is None:
-                logging.debug('Create project since no one found.')
-                notion_project: Project = projects_col.add_row(
+                logging.warning('Create project since no one found.')
+                notion_project: CollectionRowBlock = projects_col.add_row(
                     update_views=False)
                 notion_project.title = self.project_name
                 notion_project.stage = '💡Idea'
@@ -70,16 +68,21 @@ class Task:
 
             self.assigned_project = project
 
-    def insert_into(self, tasks_col: Collection, force=False) -> None:
+    def insert_into(self, tasks_col: Collection) -> None:
         """Insert task into collection if not existing"""
-        if tasks_col and (not self._inserted or force):
-            created_task: CollectionRowBlock = tasks_col.add_row(
-                update_views=False)
+        if tasks_col:
+            notion_task: CollectionRowBlock = None
+            if found_task := _find_resource(self.title, tasks_col):
+                logging.warning(f"Task already exists, update its values")
+                notion_task = found_task
+            else:
+                notion_task = tasks_col.add_row(
+                    update_views=False)
 
             for key, value in self.dict_to_insert().items():
                 logging.debug(f"{key} -> {value}")
 
-                setattr(created_task, key, value)
+                setattr(notion_task, key, value)
 
             self._inserted = True
 
@@ -118,3 +121,15 @@ def get_tasks(collection: Collection) -> List[Task]:
         tasks.append(task)
 
     return tasks
+
+
+def _find_resource(key: str, collection: Collection) -> Optional[CollectionRowBlock]:
+    """Find notion CollectionRowBlock resource from collection"""
+    resource = None
+
+    key_lowered = key.lower()
+    for block in collection.get_rows():
+        if hasattr(block, 'title') and block.title.lower().find(key_lowered) > -1:
+            resource = block
+
+    return resource

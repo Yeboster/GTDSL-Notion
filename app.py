@@ -22,7 +22,7 @@ def process_inbox_tasks(inbox_col: Collection, tasks_col: Collection, projects_c
         if task.convert:
             task.assign_or_create_project_into(projects_col)
 
-            logging.warn(f"Creating new task for {task}")
+            logging.warning(f"Creating new task for {task}")
 
             task.insert_into(tasks_col)
 
@@ -31,7 +31,7 @@ def process_inbox_tasks(inbox_col: Collection, tasks_col: Collection, projects_c
             inbox_block = client.get_block(task.id)
             task.post_creation_action(inbox_block)
 
-            logging.warn("Task correctly inserted.")
+            logging.warning("Task correctly inserted.")
 
     logging.info("--- PROCESSING FINISHED ---")
 
