@@ -7,6 +7,6 @@ Todo:
   ☐ Manage 503 error: restart procedure and check if tasks already exists + print error into inbox task.
   ✔ Logging @done(20-08-11 14:00)
   ✔ Dockerize application @done(20-08-15 18:56)
-  ☐ Improve project structure
+  ✔ Improve project structure @done(20-08-16 13:36)
   ☐ Kubernetize application @started(20-08-15 18:56)
   ☐ Deploy application
