@@ -36,18 +36,21 @@ if __name__ == '__main__':
     logging.info("Starting the application...")
 
     inbox_cv = client.get_collection_view(inbox_url)
-    inbox_col = inbox_cv.collection
+    inbox_col: Collection = inbox_cv.collection
     projects_cv = client.get_collection_view(projects_url)
     projects_col: Collection = projects_cv.collection
     tasks_cv = client.get_collection_view(tasks_url)
     tasks_col: Collection = tasks_cv.collection
 
-    # Jobs
+
     get_block = client.get_block
     process_inbox_tasks(inbox_col, tasks_col, projects_col, get_block)
+    delete_old_converted_tasks(inbox_col, get_block)
+
+    # Jobs
     schedule.every(2).minutes.do(process_inbox_tasks,
                                  inbox_col, tasks_col, projects_col, get_block)
-    schedule.every(1).day.do(delete_old_converted_tasks, inbox_col)
+    schedule.every(1).day.do(delete_old_converted_tasks, inbox_col, get_block)
 
     while True:
         schedule.run_pending()

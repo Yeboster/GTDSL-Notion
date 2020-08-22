@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import *
 
 from notion.block import TextBlock
@@ -17,20 +18,30 @@ class Project:
 
 @dataclass
 class Task:
-    """Class to represent notion GTD task"""
-    id: str
-    title: str
-    project_name: str
-    assigned_project: Project
-    scheduled: NotionDate
-    url: str
-    status: str
-    context: str
+    """Stateless class to represent notion GTD task"""
+    id: Optional[str] = None
+    title: Optional[str] = None
+    project_name: Optional[str] = None
+    assigned_project: Optional[Project] = None
+    scheduled: Optional[NotionDate] = None
+    url: Optional[str] = None
+    status: Optional[str] = None
+    context: Optional[str] = None
+    created: Optional[datetime] = None
     convert: bool = False
-    _inserted: bool = False
+    inserted: bool = False
+
+    def can_be_deleted(self) -> bool:
+        delete = False
+        if not self.convert and self.inserted:
+            if datetime.now() - self.created > timedelta(hours=2):
+                delete = True
+
+        return delete
+
 
     def apply_properties_from(self, properties: Dict[str, str]) -> None:
-        keys = ['scheduled', 'status', 'context', 'url', 'convert']
+        keys = ['scheduled', 'status', 'context', 'url', 'convert', 'created', 'inserted']
         for key in keys:
             value = properties[key]
             setattr(self, key, value)
@@ -49,14 +60,14 @@ class Task:
 
     def assign_or_create_project_into(self, projects_col: Collection) -> None:
         """Get project based on name. If found it returns a Project GTD wrapper"""
-        project: Project = None
+        project: Optional[Project] = None
         if self.project_name and projects_col and not self.assigned_project:
 
             if found_project := _find_resource(self.project_name, projects_col):
                 project = Project(found_project.id, found_project.title)
 
             if project is None:
-                logging.warning('Create project since no one found.')
+                logging.warning(f"Create project '{self.project_name}' since no one found.")
                 notion_project: CollectionRowBlock = projects_col.add_row(
                     update_views=False)
                 notion_project.title = self.project_name
@@ -68,8 +79,8 @@ class Task:
 
     def insert_into(self, tasks_col: Collection) -> None:
         """Insert task into collection if not existing"""
-        if tasks_col:
-            notion_task: CollectionRowBlock = None
+        if tasks_col and self.title:
+            notion_task: Optional[CollectionRowBlock] = None
             if found_task := _find_resource(self.title, tasks_col):
                 logging.warning(f"Task already exists, update its values")
                 notion_task = found_task
@@ -77,20 +88,19 @@ class Task:
                 notion_task = tasks_col.add_row(
                     update_views=False)
 
+            self.id = notion_task.id
             for key, value in self.dict_to_insert().items():
                 logging.debug(f"{key} -> {value}")
 
                 setattr(notion_task, key, value)
 
-            self._inserted = True
-
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
-        """Run all the actions after creating GTD task."""
+        """Actions after creating GTD task."""
         inbox_block.convert = False
-        task_title = inbox_block.title
-        inbox_block.title = "✅ " + task_title
+        inbox_block.inserted = True
         content = f"Added task to **'{self.assigned_project.title}'** project." if self.assigned_project else f"Task added without project."
         inbox_block.children.add_new(TextBlock, title=content)
+        # TODO: Add link to page
 
 
 def decode_dsl(id: str, content: str, properties: Dict[str, str]) -> Task:

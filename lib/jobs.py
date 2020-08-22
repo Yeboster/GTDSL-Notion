@@ -29,11 +29,13 @@ def process_inbox_tasks(inbox_col: Collection, tasks_col: Collection, projects_c
     logging.info("--- PROCESSING FINISHED ---")
 
 
-def delete_old_converted_tasks(inbox_col: Collection):
+def delete_old_converted_tasks(inbox_col: Collection, get_block: Callable):
     """Delete old converted tasks job
     """
+    logging.info("--- DELETING TASKS ----")
     tasks: List[Task] = get_tasks(inbox_col)
     for task in tasks:
-        if not task.convert:
-            pass
-            # Check if already converted, if so, delete
+        if task.can_be_deleted():
+            logging.info(f"Removing Task '{task.title}'")
+            get_block(task.id).remove()
+    logging.info("--- DELETING TASKS FINISHED ----")
