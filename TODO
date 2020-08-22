@@ -2,11 +2,13 @@
 Todo:
   ✔ Convert notebook to modules @started(20-08-10 16:13) @done(20-08-11 13:59) @lasted(21h46m56s)
   ✔ Add polling to check inbox tasks @started(20-08-15 16:19) @done(20-08-15 16:56) @lasted(37m39s)
-  ☐ Observe Collection and trigger observe task @deferred
-  ☐ Observe task @deferred
-  ☐ Manage 503 error: restart procedure and check if tasks already exists + print error into inbox task.
+  ✔ Manage 503 error: Make application error resistant @done(20-08-22 18:49)
   ✔ Logging @done(20-08-11 14:00)
   ✔ Dockerize application @done(20-08-15 18:56)
   ✔ Improve project structure @done(20-08-16 13:36)
-  ☐ Kubernetize application @started(20-08-15 18:56)
+  ✔ Kubernetize application @started(20-08-15 18:56) @done(20-08-22 18:47) @lasted(6d23h51m57s)
+  ☐ Observe Collection and trigger observe task @deferred
+  ☐ Observe task @deferred
+  ☐ Manage 503 error: restart procedure print error into inbox task @deferred
   ☐ Deploy application
+  ☐ Integrate calendar scheduler
