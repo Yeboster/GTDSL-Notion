@@ -11,22 +11,21 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Project:
     """Class to represent notion GTD project"""
-    id: str = None
-    title: str = None
+    id: str
+    title: str
 
 
 @dataclass
 class Task:
     """Class to represent notion GTD task"""
-    id: str = None
-    title: str = None
-    # TODO: Improve name semantics
-    project_name: str = None
-    assigned_project: Project = None
-    scheduled: NotionDate = None
-    url: str = None
-    status: str = None
-    context: str = None
+    id: str
+    title: str
+    project_name: str
+    assigned_project: Project
+    scheduled: NotionDate
+    url: str
+    status: str
+    context: str
     convert: bool = False
     _inserted: bool = False
 
