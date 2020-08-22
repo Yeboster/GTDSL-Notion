@@ -13,14 +13,17 @@ from lib.jobs import process_inbox_tasks, delete_old_converted_tasks
 logger = logging.getLogger(__name__)
 
 
-if __name__ == '__main__':
-    # Setup
+def setup():
     load_dotenv()
 
-    log_level = logging.INFO if getenv(
-        'ENVIRONMENT', 'development') == 'development' else logging.WARN
+    log_level = (
+        logging.INFO
+        if getenv("ENVIRONMENT", "development") == "development"
+        else logging.WARN
+    )
     logging.basicConfig(
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", level=log_level)
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", level=log_level
+    )
 
     token = getenv("NOTION_TOKEN")
     inbox_url = getenv("INBOX_URL")
@@ -31,7 +34,8 @@ if __name__ == '__main__':
         raise Exception("Missing envs.")
 
     client = NotionClient(
-        token_v2=token, monitor=True, start_monitoring=True, enable_caching=False)
+        token_v2=token, monitor=True, start_monitoring=True, enable_caching=False
+    )
 
     logging.info("Starting the application...")
 
@@ -42,15 +46,23 @@ if __name__ == '__main__':
     tasks_cv = client.get_collection_view(tasks_url)
     tasks_col: Collection = tasks_cv.collection
 
-
     get_block = client.get_block
+
+    return inbox_col, projects_col, tasks_col, get_block
+
+
+if __name__ == "__main__":
+    inbox_col, projects_col, tasks_col, get_block = setup()
+
+    # Run once
     process_inbox_tasks(inbox_col, tasks_col, projects_col, get_block)
     delete_old_converted_tasks(inbox_col, get_block)
 
     # Jobs
-    schedule.every(2).minutes.do(process_inbox_tasks,
-                                 inbox_col, tasks_col, projects_col, get_block)
-    schedule.every(1).day.do(delete_old_converted_tasks, inbox_col, get_block)
+    schedule.every(10).minutes.do(
+        process_inbox_tasks, inbox_col, tasks_col, projects_col, get_block
+    )
+    schedule.every(2).hours.do(delete_old_converted_tasks, inbox_col, get_block)
 
     while True:
         schedule.run_pending()
