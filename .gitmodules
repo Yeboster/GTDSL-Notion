@@ -1,0 +1,3 @@
+[submodule "lib/gtdsl-gcalendar"]
+	path = lib/gtdsl-gcalendar
+	url = git@github.com:Yeboster/GTDSL-GCalendar.git
