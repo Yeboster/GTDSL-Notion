@@ -12,9 +12,7 @@ black = "*"
 notion-py = "*"
 python-dotenv = "*"
 schedule = "*"
-"gtdsl.gcalendar" = {path = "./../gcalendar"}
-gtdsl-gcalendar = {path = "./../gcalendar"}
-gcalendar = {path = "./../gcalendar"}
+gtdsl-gcalendar = {path = "./gtdsl/gcalendar"}
 
 [requires]
 python_version = "3.8"
