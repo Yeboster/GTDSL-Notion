@@ -93,7 +93,6 @@ class Task:
 
             self.assigned_project = project
 
-    # def insert_into(self, tasks_col: Collection) -> None:
     def insert_into(self, tasks_col: Collection, gcalendar: GCalendar) -> None:
         """Insert task into collection if not existing"""
         if tasks_col and self.title:
@@ -123,16 +122,16 @@ class Task:
 
             start_date = notion_date.start
             end_date = notion_date.end
-            if type(start_date) is date:
-                logging.info('Adding task to Calendar')
 
-                title = (
-                    self.assigned_project.title + ": "
-                    if self.assigned_project
-                    else ""
-                ) + self.title
+            logging.info('Adding task to Calendar')
 
-                insert_fun(title, start_date=start_date, end_date=end_date)
+            title = (
+                self.assigned_project.title + ": "
+                if self.assigned_project
+                else ""
+            ) + self.title
+
+            insert_fun(title, start_date=start_date, end_date=end_date)
 
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
         """Actions after creating GTD task."""
