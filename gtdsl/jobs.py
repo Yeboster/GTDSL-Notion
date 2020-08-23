@@ -47,5 +47,5 @@ def delete_old_converted_tasks(inbox_col: Collection, get_block: Callable):
     for task in tasks:
         if task.can_be_deleted():
             logging.info(f"Removing Task '{task.title}'")
-            get_block(task.id).remove()
+            get_block(task.inbox_id).remove()
     logging.info("--- DELETING TASKS FINISHED ----")
