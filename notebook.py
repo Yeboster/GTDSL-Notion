@@ -27,8 +27,10 @@ projects_url = getenv("PROJECTS_URL")
 # %%
 inbox_cv = client.get_collection_view(inbox_url)
 inbox_col = inbox_cv.collection
-
 inbox_tasks = inbox_col.get_rows()
+
+
+# %%
 tasks = []
 for n_task in inbox_tasks:
     properties: Dict[str, str] = n_task.get_all_properties()

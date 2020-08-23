@@ -1,10 +1,11 @@
-import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import *
+from datetime import date, datetime, timedelta
+import logging
+from typing import Any, Dict, List, Optional
 
+from gcalendar.gcalendar import GCalendar
 from notion.block import TextBlock
-from notion.collection import NotionDate, Collection, CollectionRowBlock
+from notion.collection import Collection, CollectionRowBlock, NotionDate
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Project:
     """Class to represent notion GTD project"""
+
     id: str
     title: str
 
@@ -19,40 +21,51 @@ class Project:
 @dataclass
 class Task:
     """Stateless class to represent notion GTD task"""
+
+    inbox_id: str
     id: Optional[str] = None
     title: Optional[str] = None
     project_name: Optional[str] = None
     assigned_project: Optional[Project] = None
-    scheduled: Optional[NotionDate] = None
     url: Optional[str] = None
     status: Optional[str] = None
     context: Optional[str] = None
-    created: Optional[datetime] = None
+    scheduled: Optional[NotionDate] = None
+    time_repetition: bool = False
+    created_at: Optional[datetime] = None
     convert: bool = False
     inserted: bool = False
 
     def can_be_deleted(self) -> bool:
         delete = False
         if not self.convert and self.inserted:
-            if datetime.now() - self.created > timedelta(hours=2):
+            if datetime.now() - self.created_at > timedelta(hours=2):
                 delete = True
 
         return delete
 
-
     def apply_properties_from(self, properties: Dict[str, str]) -> None:
-        keys = ['scheduled', 'status', 'context', 'url', 'convert', 'created', 'inserted']
+        keys = [
+            "scheduled",
+            "status",
+            "context",
+            "url",
+            "convert",
+            "created_at",
+            "inserted",
+            "time_repetition",
+        ]
         for key in keys:
             value = properties[key]
             setattr(self, key, value)
 
     def dict_to_insert(self) -> Dict[str, Any]:
-        keys = ['title', 'project', 'scheduled', 'url', 'status', 'context']
+        keys = ["title", "project", "scheduled", "url", "status", "context"]
         insert_dict: Dict[str, Any] = {}
         for key in keys:
-            if key == 'project':
+            if key == "project":
                 if prj := self.assigned_project:
-                    insert_dict['project'] = prj.id
+                    insert_dict["project"] = prj.id
             else:
                 insert_dict[key] = getattr(self, key)
 
@@ -60,24 +73,28 @@ class Task:
 
     def assign_or_create_project_into(self, projects_col: Collection) -> None:
         """Get project based on name. If found it returns a Project GTD wrapper"""
-        project: Optional[Project] = None
         if self.project_name and projects_col and not self.assigned_project:
 
+            project: Optional[Project] = None
             if found_project := _find_resource(self.project_name, projects_col):
                 project = Project(found_project.id, found_project.title)
 
             if project is None:
-                logging.warning(f"Create project '{self.project_name}' since no one found.")
+                logging.warning(
+                    f"Create project '{self.project_name}' since no one found."
+                )
                 notion_project: CollectionRowBlock = projects_col.add_row(
-                    update_views=False)
+                    update_views=False
+                )
                 notion_project.title = self.project_name
-                notion_project.stage = '💡Idea'
+                notion_project.stage = "💡Idea"
 
                 project = Project(notion_project.id, notion_project.title)
 
             self.assigned_project = project
 
-    def insert_into(self, tasks_col: Collection) -> None:
+    # def insert_into(self, tasks_col: Collection) -> None:
+    def insert_into(self, tasks_col: Collection, gcalendar: GCalendar) -> None:
         """Insert task into collection if not existing"""
         if tasks_col and self.title:
             notion_task: Optional[CollectionRowBlock] = None
@@ -85,28 +102,55 @@ class Task:
                 logging.warning(f"Task already exists, update its values")
                 notion_task = found_task
             else:
-                notion_task = tasks_col.add_row(
-                    update_views=False)
+                notion_task = tasks_col.add_row(update_views=False)
 
             self.id = notion_task.id
             for key, value in self.dict_to_insert().items():
                 logging.debug(f"{key} -> {value}")
 
+                if key == "scheduled":
+                    self.add_to_calendar(gcalendar)
+
                 setattr(notion_task, key, value)
+
+    def add_to_calendar(self, gcalendar):
+        if notion_date := self.scheduled:
+            insert_fun = (
+                gcalendar.insert_time_repetition_event
+                if self.time_repetition
+                else gcalendar.insert_event
+            )
+
+            start_date = notion_date.start
+            end_date = notion_date.end
+            if type(start_date) is date:
+                logging.info('Adding task to Calendar')
+
+                title = (
+                    self.assigned_project.title + ": "
+                    if self.assigned_project
+                    else ""
+                ) + self.title
+
+                insert_fun(title, start_date=start_date, end_date=end_date)
 
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
         """Actions after creating GTD task."""
         inbox_block.convert = False
         inbox_block.inserted = True
-        content = f"Added task to **'{self.assigned_project.title}'** project." if self.assigned_project else f"Task added without project."
+        content = (
+            f"Added task to **'{self.assigned_project.title}'** project."
+            if self.assigned_project
+            else f"Task added without project."
+        )
         inbox_block.children.add_new(TextBlock, title=content)
         # TODO: Add link to page
 
 
 def decode_dsl(id: str, content: str, properties: Dict[str, str]) -> Task:
     task: Task = Task(id)
-    if (pos := content.find(':')) > -1:
-        task.title = content[pos+1:].strip().capitalize()
+    if (pos := content.find(":")) > -1:
+        task.title = content[pos + 1 :].strip().capitalize()
         task.project_name = content[:pos].strip().capitalize()
     else:
         task.title = content.strip().capitalize()
@@ -137,7 +181,8 @@ def _find_resource(key: str, collection: Collection) -> Optional[CollectionRowBl
 
     key_lowered = key.lower()
     for block in collection.get_rows():
-        if hasattr(block, 'title') and block.title.lower().find(key_lowered) > -1:
+        if hasattr(block, "title") and block.title.lower().find(key_lowered) > -1:
             resource = block
+            break
 
     return resource

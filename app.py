@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 from notion.client import NotionClient
 from notion.collection import Collection
 
-from lib.jobs import process_inbox_tasks, delete_old_converted_tasks
+from gtdsl.jobs import process_inbox_tasks, delete_old_converted_tasks
+from gcalendar.gcalendar import GCalendar
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +30,10 @@ def setup():
     inbox_url = getenv("INBOX_URL")
     tasks_url = getenv("TASKS_URL")
     projects_url = getenv("PROJECTS_URL")
+    calendar_id = getenv("GCALENDAR_ID")
+    timezone = getenv("GTIMEZONE")
 
-    if not (token and inbox_url and tasks_url and projects_url):
+    if not (token and inbox_url and tasks_url and projects_url and calendar_id):
         raise Exception("Missing envs.")
 
     client = NotionClient(
@@ -48,19 +51,21 @@ def setup():
 
     get_block = client.get_block
 
-    return inbox_col, projects_col, tasks_col, get_block
+    calendar = GCalendar(calendar_id=calendar_id, pickle_path="./token.pickle", timezone=timezone)
+
+    return inbox_col, projects_col, tasks_col, get_block, calendar
 
 
 if __name__ == "__main__":
-    inbox_col, projects_col, tasks_col, get_block = setup()
+    inbox_col, projects_col, tasks_col, get_block, calendar = setup()
 
     # Run once
-    process_inbox_tasks(inbox_col, tasks_col, projects_col, get_block)
+    process_inbox_tasks(inbox_col, tasks_col, projects_col, get_block, calendar)
     delete_old_converted_tasks(inbox_col, get_block)
 
     # Jobs
     schedule.every(10).minutes.do(
-        process_inbox_tasks, inbox_col, tasks_col, projects_col, get_block
+        process_inbox_tasks, inbox_col, tasks_col, projects_col, get_block, calendar
     )
     schedule.every(2).hours.do(delete_old_converted_tasks, inbox_col, get_block)
 

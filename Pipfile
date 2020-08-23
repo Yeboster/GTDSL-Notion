@@ -5,11 +5,19 @@ verify_ssl = true
 
 [dev-packages]
 neovim = "*"
+pylint = "*"
+black = "*"
 
 [packages]
 notion-py = "*"
 python-dotenv = "*"
 schedule = "*"
+"gtdsl.gcalendar" = {path = "./../gcalendar"}
+gtdsl-gcalendar = {path = "./../gcalendar"}
+gcalendar = {path = "./../gcalendar"}
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
