@@ -4,10 +4,11 @@ services:
   notiongtdsl:
     image: notiongtdsl
     container_name: notion-gtdsl
-    env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
+    env_file: .env
     secrets:
       - gtdsl_token_pickle
       - gtdsl_credentials
