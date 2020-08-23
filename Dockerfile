@@ -15,9 +15,11 @@ ENV ENVIRONMENT "production"
 
 WORKDIR /app
 
-# Install pip requirements
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+# Install pipenv
+RUN python -m pip install pipenv
+COPY Pipfile* ./
+COPY gtdsl/gcalendar gtdsl/gcalendar
+RUN python -m pipenv install --system --deploy
 
 COPY . /app
 

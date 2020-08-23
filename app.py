@@ -33,7 +33,18 @@ def setup():
     calendar_id = getenv("GCALENDAR_ID")
     timezone = getenv("GTIMEZONE")
 
-    if not (token and inbox_url and tasks_url and projects_url and calendar_id):
+    token_pickle_path = getenv("GTOKEN_PICKLE_PATH")
+    gcredentials_path = getenv("GCREDENTIALS_PATH")
+
+    if not (
+        token
+        and inbox_url
+        and tasks_url
+        and projects_url
+        and calendar_id
+        and token_pickle_path
+        and gcredentials_path
+    ):
         raise Exception("Missing envs.")
 
     client = NotionClient(
@@ -51,7 +62,9 @@ def setup():
 
     get_block = client.get_block
 
-    calendar = GCalendar(calendar_id=calendar_id, pickle_path="./token.pickle", timezone=timezone)
+    calendar = GCalendar(
+        calendar_id=calendar_id, credentials_path=gcredentials_path, pickle_path=token_pickle_path, timezone=timezone
+    )
 
     return inbox_col, projects_col, tasks_col, get_block, calendar
 

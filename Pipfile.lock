@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "bc7e79085394ad109142449f61162b24402a0e9545bd18984a6fc60ceedad344"
+            "sha256": "ea33abdd1843a69774ced3efc7b83194f6b062e4dc8ddc4890ae688fd37d8647"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -73,10 +73,6 @@
             ],
             "version": "==0.8.1"
         },
-        "gcalendar": {
-            "path": "./../gcalendar",
-            "version": "==0.0.4"
-        },
         "google-api-core": {
             "hashes": [
                 "sha256:35cba563034d668ae90ffe1f03193a84e745b38f09592f60258358b5e5ee6238",
@@ -124,10 +120,8 @@
             "version": "==1.52.0"
         },
         "gtdsl-gcalendar": {
-            "path": "./../gcalendar"
-        },
-        "gtdsl.gcalendar": {
-            "path": "./../gcalendar"
+            "path": "./gtdsl/gcalendar",
+            "version": "==0.0.4.1"
         },
         "httplib2": {
             "hashes": [

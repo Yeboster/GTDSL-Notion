@@ -11,5 +11,14 @@
 **/.vscode
 **/docker-compose*
 **/Dockerfile*
+.gitmodules
+.gitignore
+.env
+.env.template
 TODO
+VERSION
 README.md
+token.pickle
+credentials.json
+docker*
+skaffold.yaml
