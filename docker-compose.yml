@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   notiongtdsl:
@@ -9,12 +9,11 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file: .env
+    volumes:
+      - ./token.pickle:/app/token.pickle
     secrets:
-      - gtdsl_token_pickle
       - gtdsl_credentials
 
 secrets:
-  gtdsl_token_pickle:
-    file: token.pickle
   gtdsl_credentials:
     file: credentials.json

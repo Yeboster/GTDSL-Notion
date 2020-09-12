@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Callable
 
 from gcalendar.gcalendar import GCalendar
 from notion.block import TextBlock
@@ -50,17 +50,24 @@ class Task:
             "status",
             "context",
             "url",
-            "convert",
             "created_at",
             "inserted",
+            # Inbox collection specific
+            "convert",
             "time_repetition",
+            # Tasks collection specific
+            "project",
         ]
         for key in keys:
-            value = properties[key]
-            setattr(self, key, value)
+            try:
+                value = properties[key]
+                setattr(self, key, value)
+            except:
+                # There are some keys present only in inbox coll
+                pass
 
     def dict_to_insert(self) -> Dict[str, Any]:
-        keys = ["title", "project", "scheduled", "url", "status", "context"]
+        keys = ["title", "project", "scheduled", "url", "status", "context", "inserted"]
         insert_dict: Dict[str, Any] = {}
         for key in keys:
             if key == "project":
@@ -110,7 +117,14 @@ class Task:
                 if key == "scheduled":
                     self.add_to_calendar(gcalendar)
 
+                self.inserted = True
                 setattr(notion_task, key, value)
+
+    def calendar_title(self):
+        title = (
+            self.assigned_project.title + ": " if self.assigned_project else ""
+        ) + self.title
+        return title
 
     def add_to_calendar(self, gcalendar):
         if notion_date := self.scheduled:
@@ -123,15 +137,9 @@ class Task:
             start_date = notion_date.start
             end_date = notion_date.end
 
-            logging.info('Adding task to Calendar')
+            logging.info("Adding task to Calendar")
 
-            title = (
-                self.assigned_project.title + ": "
-                if self.assigned_project
-                else ""
-            ) + self.title
-
-            insert_fun(title, start_date=start_date, end_date=end_date)
+            insert_fun(self.calendar_title(), start_date=start_date, end_date=end_date)
 
     def post_creation_action(self, inbox_block: CollectionRowBlock) -> None:
         """Actions after creating GTD task."""
@@ -157,6 +165,27 @@ def decode_dsl(id: str, content: str, properties: Dict[str, str]) -> Task:
     task.apply_properties_from(properties)
 
     return task
+
+
+def get_tasks_and_related_projects(collection: Collection) -> List[Task]:
+    """Get rows from tasks collection parsed as Task."""
+    tasks: List[Task] = []
+    for notion_task in collection.get_rows():
+        properties: Dict[str, str] = notion_task.get_all_properties()
+
+        id = notion_task.id
+        title = notion_task.title
+        task: Task = decode_dsl(id, title, properties)
+
+        if "project" in properties:
+            project_list: List[CollectionRowBlock] = properties["project"]
+            if len(project_list) > 0 and (first := project_list[0]):
+                project: Project = Project(first.id, first.title)
+                task.assigned_project = project
+
+        tasks.append(task)
+
+    return tasks
 
 
 def get_tasks(collection: Collection) -> List[Task]:
