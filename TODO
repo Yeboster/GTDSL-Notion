@@ -11,4 +11,6 @@ Todo:
   ☐ Observe task @deferred
   ☐ Manage 503 error: restart procedure print error into inbox task @deferred
   ☐ Deploy application
-  ☐ Integrate calendar scheduler
+  ✔ Integrate calendar scheduler @done(20-09-13 13:27)
+  ☐ Divide inbox and task into its own class
+  ☐ Update notion task value if class attribute has changed

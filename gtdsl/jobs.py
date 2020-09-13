@@ -54,15 +54,10 @@ def create_or_update_events(
     collection: Collection, get_block: Callable, gcalendar: GCalendar, days_range: int
 ):
     """Create or update calendar events on the collection."""
-    # Get all tasks, filtered by not_inserted
     logging.info("--- PROCESSING EVENTS ----")
     tasks: List[Task] = get_tasks_and_related_projects(collection)
-    logging.info(f"List collection tasks {tasks}")
     for task in tasks:
-        logging.info(task.title)
-        # Check if has schedule
         if not task.inserted and task.scheduled:
-            logging.info("Going")
             # Check if event already exists
             event = gcalendar.find_event_with(
                 summary=task.calendar_title(), not_before_days=days_range
