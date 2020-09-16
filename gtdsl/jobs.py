@@ -73,3 +73,4 @@ def create_or_update_events(
 
             # TODO: Change name of inbox_id
             get_block(task.inbox_id).inserted = True
+    logging.info("--- PROCESSING EVENTS FINISHED ----")
