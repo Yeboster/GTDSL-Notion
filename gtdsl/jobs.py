@@ -59,12 +59,13 @@ def create_or_update_events(
     for task in tasks:
         if not task.inserted and task.scheduled:
             # Check if event already exists
-            event = gcalendar.find_event_with(
+            events = gcalendar.find_events_with(
                 summary=task.calendar_title(), not_before_days=days_range
             )
-            logging.info(f"task: {task.calendar_title()} event: {event}")
-            if event:
-                gcalendar.delete_event(event["id"])
+            logging.info(f"task: {task.calendar_title()} events: {events}")
+            if events and len(events) > 0:
+                for event in events:
+                    gcalendar.delete_event(event["id"])
 
             task.add_to_calendar(gcalendar)
 
