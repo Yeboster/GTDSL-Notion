@@ -117,7 +117,8 @@ class Task:
                 if key == "scheduled":
                     self.add_to_calendar(gcalendar)
 
-                notion_task.inserted = True
+                # TODO: Improve
+                self.inserted = True
                 setattr(notion_task, key, value)
 
     def calendar_title(self):
