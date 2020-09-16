@@ -100,7 +100,9 @@ class Task:
 
             self.assigned_project = project
 
-    def insert_into(self, tasks_col: Collection, gcalendar: GCalendar) -> None:
+    def insert_into(
+        self, tasks_col: Collection, gcalendar: GCalendar
+    ) -> CollectionRowBlock:
         """Insert task into collection if not existing"""
         if tasks_col and self.title:
             notion_task: Optional[CollectionRowBlock] = None
@@ -117,9 +119,9 @@ class Task:
                 if key == "scheduled":
                     self.add_to_calendar(gcalendar)
 
-                # TODO: Improve
-                self.inserted = True
                 setattr(notion_task, key, value)
+
+            return notion_task
 
     def calendar_title(self):
         title = (

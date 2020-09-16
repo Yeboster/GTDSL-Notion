@@ -26,7 +26,9 @@ def process_inbox_tasks(
 
             logging.warning(f"Creating new task for {task}")
 
-            task.insert_into(tasks_col, gcalendar)
+            notion_task = task.insert_into(tasks_col, gcalendar)
+            notion_task.inserted = True
+            logging.info(notion_task.get_all_properties())
 
             logging.debug("Running post creation actions")
 
